@@ -27,34 +27,26 @@ public class Main {
 					stack.push(str.charAt(i));
 					// ) 가 나왔을 때
 				} else if (str.charAt(i) == ')') {
-					if (!stack.isEmpty()) {
-						if (stack.peek() == '(') {
-							stack.pop();
-						} else {
-							stack.push('x');
-							break;
-						}
-					} else {
+					if (stack.isEmpty() || stack.peek() != '(') {
 						stack.push('x');
 						break;
+					} else {
+						stack.pop();
 					}
 					// ] 가 나왔을 때
 				} else if (str.charAt(i) == ']') {
-					if (!stack.isEmpty()) {
-						if (stack.peek() == '[') {
-							stack.pop();
-						} else {
-							stack.push('x');
-							break;
-						}
-					} else {
+					if (stack.isEmpty() || stack.peek() != '[') {
 						stack.push('x');
 						break;
+					} else {
+						stack.pop();
 					}
 				}
 			}
 
-			if (stack.isEmpty()) {
+			if (stack.isEmpty())
+
+			{
 				sb.append("yes").append("\n");
 			} else {
 				sb.append("no").append("\n");
