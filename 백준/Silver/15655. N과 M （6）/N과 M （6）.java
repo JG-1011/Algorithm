@@ -48,7 +48,7 @@ public class Main {
 			if (!visit[i]) {
 				visit[i] = true;
 				arr[depth] = sortArr[i];
-				dfs(i, depth + 1);
+				dfs(i+1, depth + 1);
 				visit[i] = false;
 			}
 		}
