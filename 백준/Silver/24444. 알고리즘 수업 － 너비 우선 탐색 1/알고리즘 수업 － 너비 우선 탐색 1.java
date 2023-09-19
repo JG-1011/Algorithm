@@ -60,13 +60,16 @@ public class Main {
 	public static void bfs(int vertex) {
 		Queue<Integer> queue = new LinkedList<>();
 
+		// 처음 시작하는 정점을 큐에 넣고 방문표시를 하고 출력배열에 넣는다
 		queue.offer(vertex);
 		visit[vertex] = true;
-		ans[vertex] = cnt++;
+		ans[vertex] = cnt++; // cnt는 순서를 나타낸다.
 
 		while (!queue.isEmpty()) {
+			// 큐에 들어있던 정점을 빼면
 			int num = queue.poll();
 
+			// 아래 포문을 통해 연결되어 있는 정점들을 큐에 순서대로 넣고 방문표시를 한다.
 			for (int i = 0; i < graph.get(num).size(); i++) {
 				int next = graph.get(num).get(i);
 				if (!visit[next]) {
