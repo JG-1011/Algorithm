@@ -1,9 +1,6 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.StringTokenizer;
 
 class Point {
@@ -17,7 +14,6 @@ class Point {
 }
 
 public class Main {
-	static List<List<Integer>> graph;
 	static int N, cnt, max; // N: 한 변의 길이, cnt: 나누어지는 공간의 수 카운트, max: 최대 공간의 수
 	static boolean[][] visit;
 	static int[][] arr;
@@ -62,7 +58,7 @@ public class Main {
 			for (int i = 0; i < N; i++) {
 				for (int j = 0; j < N; j++) {
 					if (!visit[i][j] && arr[i][j] != 0) {
-						bfs(i, j);
+						dfs(i, j);
 						cnt++;
 					}
 				}
@@ -73,27 +69,18 @@ public class Main {
 		System.out.println(max);
 	}
 
-	// bfs 외운 공식 대입	
-	public static void bfs(int r, int c) {
-		Queue<Point> queue = new LinkedList<>();
-		queue.offer(new Point(r, c));
+	// bfs 외운 공식 대입
+	public static void dfs(int r, int c) {
 		visit[r][c] = true;
 
-		while (!queue.isEmpty()) {
-			Point p = queue.poll();
+		for (int d = 0; d < 4; d++) {
+			int nr = r + dr[d];
+			int nc = c + dc[d];
 
-			for (int d = 0; d < 4; d++) {
-				int nr = p.r + dr[d];
-				int nc = p.c + dc[d];
-
-				if (nr < 0 || nc < 0 || nr >= N || nc >= N || arr[nr][nc] == 0 || visit[nr][nc]) {
-					continue;
-				}
-				queue.offer(new Point(nr, nc));
-				visit[nr][nc] = true;
-
+			if (nr < 0 || nc < 0 || nr >= N || nc >= N || visit[nr][nc] || arr[nr][nc] == 0) {
+				continue;
 			}
-
+			dfs(nr, nc);
 		}
 	}
 }
