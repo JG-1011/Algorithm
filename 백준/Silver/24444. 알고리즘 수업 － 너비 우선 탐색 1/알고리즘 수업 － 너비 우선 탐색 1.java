@@ -9,75 +9,77 @@ import java.util.Queue;
 import java.util.StringTokenizer;
 
 public class Main {
-	static List<List<Integer>> graph = new ArrayList<>();
-	static int[] ans, arr;
-	static boolean[] visit;
-	static int cnt;
+	static int N, M, R; // 정점의 수, 간선의 수, 시작 정점
+	static List<ArrayList<Integer>> list; // 2차원 리스트 생성
+	static boolean[] visited;
+	static int[] res;
 
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
-		StringBuilder sb = new StringBuilder();
+		StringTokenizer st = new StringTokenizer(br.readLine());
 
-		st = new StringTokenizer(br.readLine());
-		int vertex = Integer.parseInt(st.nextToken());
-		int edge = Integer.parseInt(st.nextToken());
-		int startVertex = Integer.parseInt(st.nextToken());
+		N = Integer.parseInt(st.nextToken()); // 정점의 수
+		M = Integer.parseInt(st.nextToken()); // 간선의 수
+		R = Integer.parseInt(st.nextToken()); // 시작 정점
 
-		visit = new boolean[vertex + 1];
-		ans = new int[vertex + 1];
+		res = new int[N + 1];
 
-		// graph 리스트 안에 정점+1(인덱스와 숫자 맞추려고) 만큼 어레이리스트를 만들어준다.
-		for (int i = 0; i < vertex + 1; i++) {
-			graph.add(new ArrayList<>());
+		list = new ArrayList<>();
+
+		// 리스트 넣어주기
+		for (int i = 0; i < N + 1; i++) {
+			list.add(new ArrayList<>());
 		}
 
-		// 간선 정보를 받고 무방향으로 값을 넣어준다.
-		// 0부터 시작 : 간선 개수대로만 넣어주면 되므로
-		for (int i = 0; i < edge; i++) {
+		// 간선의 값 입력
+		for (int i = 0; i < M; i++) {
 			st = new StringTokenizer(br.readLine());
-			int fromVertex = Integer.parseInt(st.nextToken());
-			int toVertex = Integer.parseInt(st.nextToken());
+			int u = Integer.parseInt(st.nextToken());
+			int v = Integer.parseInt(st.nextToken());
 
-			graph.get(fromVertex).add(toVertex);
-			graph.get(toVertex).add(fromVertex);
+			// 양방향 간선
+			list.get(u).add(v);
+			list.get(v).add(u);
 		}
 
-		// 정점에 넣어진 값들을 오름차순으로 정렬해준다.
-		// 인덱스 1번부터 넣어줬으므로 1부터 시작
-		for (int i = 1; i < vertex + 1; i++) {
-			Collections.sort(graph.get(i));
+		// 오름차순으로 방문 -> 정렬 필요
+		for (int i = 1; i < N + 1; i++) {
+			Collections.sort(list.get(i));
 		}
-		cnt = 1;
-		bfs(startVertex);
 
-		for (int i = 1; i < ans.length; i++) {
-			sb.append(ans[i]).append("\n");
+		bfs();
+
+		for (int i = 1; i < N + 1; i++) {
+			System.out.println(res[i]);
 		}
-		System.out.println(sb);
-	}
 
-	public static void bfs(int vertex) {
-		Queue<Integer> queue = new LinkedList<>();
+	}// main
 
-		// 처음 시작하는 정점을 큐에 넣고 방문표시를 하고 출력배열에 넣는다
-		queue.offer(vertex);
-		visit[vertex] = true;
-		ans[vertex] = cnt++; // cnt는 순서를 나타낸다.
+	public static void bfs() {
+		Queue<Integer> q = new LinkedList<>(); // 큐 생성
+		visited = new boolean[N + 1]; // 방문 체크 배열
+		int cnt = 1; // 방문 순서는 1부터 시작
 
-		while (!queue.isEmpty()) {
-			// 큐에 들어있던 정점을 빼면
-			int num = queue.poll();
+		q.add(R); // 시작 정점을 큐에 먼저 넣어주기
+		visited[R] = true; // 방문했음을 체크
+		res[R] = cnt++; // R번 노드의 방문 순서를 넣고 값 증가 시키기
 
-			// 아래 포문을 통해 연결되어 있는 정점들을 큐에 순서대로 넣고 방문표시를 한다.
-			for (int i = 0; i < graph.get(num).size(); i++) {
-				int next = graph.get(num).get(i);
-				if (!visit[next]) {
-					queue.offer(next);
-					visit[next] = true;
-					ans[next] = cnt++;
+		// 큐가 빌 때 까지 while문 반복하기
+		while (!q.isEmpty()) {
+			int tmp = q.poll();
+
+			for (int i = 0; i < list.get(tmp).size(); i++) {
+				int next = list.get(tmp).get(i);
+
+				if (visited[next] == false) {
+					visited[next] = true;
+					q.add(next);
+					res[next] = cnt++;
 				}
 			}
-		}
-	}
+
+		} // while
+
+	}// bfs
+
 }
