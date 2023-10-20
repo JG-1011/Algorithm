@@ -5,6 +5,14 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
+// 조건이 많을 때 되는 부분을 찾아라
+// 예를 들어 여기서 되는 부분은
+// 1. 검이 있을 때 도달한 것
+// 2. 검이 없을 때 도달한 것
+// 이 두가지를 만족만 시켜주면 된다. 그리고 나머지는 Fail 처리
+
+// 나머지 복잡하게 조건을 달아줄 필요가 없다.
+
 public class Main {
 
 	static class Point {
@@ -20,10 +28,9 @@ public class Main {
 	static int[] dr = { -1, 1, 0, 0 };
 	static int[] dc = { 0, 0, -1, 1 };
 
-	static int N, M, T, ans, gram;
+	static int N, M, T, ans, sword;
 	static int[][] map;
-	static boolean flag,sword;
-	
+
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st;
@@ -42,16 +49,11 @@ public class Main {
 				map[i][j] = Integer.parseInt(st.nextToken());
 			}
 		}
-		// 검을 가지고 들어온 시간
 		ans = Integer.MAX_VALUE;
 		// 너비 우선 탐색
 		bfs();
-		
-		if(ans > T) {
-			System.out.println("Fail");
-		} else {
-			System.out.println(ans);
-		}
+
+		System.out.println(ans <= T ? ans : "Fail");
 	}
 
 	public static void bfs() {
@@ -65,10 +67,10 @@ public class Main {
 			// 현재 지점
 			Point now = queue.poll();
 
-			// 검을 발견
+			// 검이 발견됐을 때 검에서 도착지점까지의 거리를 구한 다음 ans에 넣어준다.
 			if (map[now.r][now.c] == 2) {
-				gram = now.time + (N - 1 - now.r) + (M - 1 - now.c); // 검을 발견한 이후 도착지까지의 시간
-				ans = Math.min(ans, gram);
+				sword = now.time + (N - 1 - now.r) + (M - 1 - now.c);
+				ans = Math.min(ans, sword);
 			}
 
 			for (int d = 0; d < 4; d++) {
@@ -79,12 +81,14 @@ public class Main {
 					continue;
 				}
 
-				if(nr == N-1 && nc == M-1) {
-					ans = Math.min(now.time + 1, ans);
-				}
-				
 				queue.add(new Point(nr, nc, now.time + 1));
 				visit[nr][nc] = true;
+
+				// 도착지점에 도달 했을 때 이미 들어가 있을 sword 갔을 때 거리와 비교를 하게 된다. ( 소드가 없을 때도 그냥 ans에 넣으면 되므로 가넝)
+				if (nr == N - 1 && nc == M - 1) {
+					ans = Math.min(ans, now.time + 1);
+				}
+
 			}
 		}
 	}
