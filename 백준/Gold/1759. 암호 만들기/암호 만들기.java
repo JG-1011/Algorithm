@@ -50,6 +50,7 @@ public class Main {
 		}
 	}
 
+	// 암호문 조건식을 작성하는게 포인트!!!
 	public static boolean check() {
 		int aeiou = 0;
 		int other = 0;
