@@ -3,16 +3,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
-/*
- * 해결방법
- * 다익스트라 사용
- *
- * */
 public class Main {
     static List<List<Node>> graph;
     static int[] dist;
-    static final int INF = 200000000;
-    static boolean[] visit;
+    static final int INF = Integer.MAX_VALUE;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -23,7 +17,6 @@ public class Main {
         int M = Integer.parseInt(st.nextToken()); // 간선의 수
 
         dist = new int[N + 1];
-        visit = new boolean[N + 1];
         graph = new ArrayList<>();
 
         for (int i = 0; i <= N; i++) {
@@ -41,44 +34,44 @@ public class Main {
             graph.get(v).add(new Node(u, w));
         }
 
-        bfs(new Node(1, 0));
+        dijkstra(1); // 1번 헛간에서 시작
 
-        System.out.println(dist[N]);
+        System.out.println(dist[N]); // N번 헛간까지 가는 최소 비용 출력
     }
 
-    private static void bfs(Node start) {
-        PriorityQueue<Node> pq = new PriorityQueue<>(new Comparator<Node>() {
-            @Override
-            public int compare(Node o1, Node o2) {
-                return o1.weight - o2.weight;
-            }
-        });
-
-        pq.add(start);
-        dist[start.vertex] = 0;
+    private static void dijkstra(int start) {
+        PriorityQueue<Node> pq = new PriorityQueue<>();
+        pq.add(new Node(start, 0));
+        dist[start] = 0;
 
         while (!pq.isEmpty()) {
             Node now = pq.poll();
 
-            if (!visit[now.vertex]) {
-                visit[now.vertex] = true;
+            // 이미 처리된 노드 무시
+            if (dist[now.vertex] < now.weight) {
+                continue;
+            }
 
-                for (Node next : graph.get(now.vertex)) {
-                    if (dist[next.vertex] > dist[now.vertex] + next.weight) {
-                        dist[next.vertex] = dist[now.vertex] + next.weight;
-                        pq.add(new Node(next.vertex, dist[next.vertex]));
-                    }
+            for (Node next : graph.get(now.vertex)) {
+                if (dist[next.vertex] > dist[now.vertex] + next.weight) {
+                    dist[next.vertex] = dist[now.vertex] + next.weight;
+                    pq.add(new Node(next.vertex, dist[next.vertex]));
                 }
             }
         }
     }
 }
 
-class Node {
+class Node implements Comparable<Node> {
     int vertex, weight;
 
     public Node(int vertex, int weight) {
         this.vertex = vertex;
         this.weight = weight;
+    }
+
+    @Override
+    public int compareTo(Node other) {
+        return this.weight - other.weight;
     }
 }
