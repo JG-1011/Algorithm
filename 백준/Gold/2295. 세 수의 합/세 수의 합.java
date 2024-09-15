@@ -44,15 +44,31 @@ public class Main {
         Collections.sort(twoSum);
 
         for (int i = N - 1; i >= 0; i--) {
-            for (int j = 0; j < i; j++) {
+            for (int j = 0; j < N; j++) {
                 int target = arr[i] - arr[j];
-                if (Collections.binarySearch(twoSum, target) >= 0) {
+                if (binarySearch(twoSum, target)) {
                     System.out.println(arr[i]);
                     return;
                 }
             }
         }
 
+    }
+
+    private static boolean binarySearch(List<Integer> twoSum, int target) {
+        int left = 0;
+        int right = twoSum.size() - 1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (twoSum.get(mid) == target) {
+                return true;
+            } else if (twoSum.get(mid) < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return false;
     }
 
 }
