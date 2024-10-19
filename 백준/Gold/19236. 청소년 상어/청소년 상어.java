@@ -1,29 +1,23 @@
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 public class Main {
-    static int[] dx = {-1, -1, 0, 1, 1, 1, 0, -1}; // 상, 상좌, 좌, 좌하, 하, 하우, 우, 상우
-    static int[] dy = {0, -1, -1, -1, 0, 1, 1, 1};
+    static int[] dr = {-1, -1, 0, 1, 1, 1, 0, -1};
+    static int[] dc = {0, -1, -1, -1, 0, 1, 1, 1};
     static int maxSum = 0; // 상어가 먹은 물고기 번호 합의 최대값
 
     // 물고기 클래스
     static class Fish {
-        int x, y, dir;
+        int r, c, dir;
         boolean isAlive;
 
-        Fish(int x, int y, int dir) {
-            this.x = x;
-            this.y = y;
+        public Fish(int r, int c, int dir) {
+            this.r = r;
+            this.c = c;
             this.dir = dir;
             this.isAlive = true;
-        }
-
-        // 깊은 복사를 위한 생성자
-        Fish(Fish f) {
-            this.x = f.x;
-            this.y = f.y;
-            this.dir = f.dir;
-            this.isAlive = f.isAlive;
         }
     }
 
@@ -44,102 +38,104 @@ public class Main {
             }
         }
 
-        // 상어가 (0,0)의 물고기를 먹음
-        int startFishId = map[0][0];
-        int initialSum = startFishId;
-        Fish startFish = fishes[startFishId];
+        // 상어 이동
+        // 0,0에 있는 물고기 정보를 저장해놔야 함
+        int startId = map[0][0];
+        int initialSum = startId;
+        Fish startFish = fishes[startId];
         startFish.isAlive = false;
         int initialDir = startFish.dir;
-        map[0][0] = -1; // 상어의 위치 표시
+        map[0][0] = -1;
 
-        // DFS 시작
         dfs(map, fishes, 0, 0, initialDir, initialSum);
+
         System.out.println(maxSum);
+
     }
 
-    // DFS 함수
-    static void dfs(int[][] map, Fish[] fishes, int sharkX, int sharkY, int sharkDir, int eatSum) {
+    private static void dfs(int[][] map, Fish[] fishes, int sharkR, int sharkC, int sharkD, int eatSum) {
         maxSum = Math.max(maxSum, eatSum);
 
-        // 현재 상태 복사 (백트래킹을 위해 깊은 복사)
         int[][] copyMap = new int[4][4];
         Fish[] copyFishes = new Fish[17];
-        for (int i = 0; i < 4; i++) {
-            copyMap[i] = map[i].clone();
-        }
-        for (int i = 1; i <= 16; i++) {
-            copyFishes[i] = new Fish(fishes[i]);
-        }
+        BackUp(map, copyMap, fishes, copyFishes);
 
-        // 물고기 이동
         moveAllFish(copyMap, copyFishes);
 
-        // 상어 이동 (1, 2, 3 칸 이동 가능)
-        for (int step = 1; step < 4; step++) {
-            int nx = sharkX + dx[sharkDir] * step;
-            int ny = sharkY + dy[sharkDir] * step;
+        //상어이동
+        for (int step = 1; step <= 3; step++) {
+            int nr = sharkR + dr[sharkD] * step;
+            int nc = sharkC + dc[sharkD] * step;
 
-            // 격자 범위 내에 있고, 물고기가 있는 칸일 경우
-            if (isIn(nx, ny) && copyMap[nx][ny] > 0) {
-                int fishId = copyMap[nx][ny];
-                Fish eatenFish = copyFishes[fishId];
-                copyFishes[fishId].isAlive = false;
-                copyMap[sharkX][sharkY] = 0; // 상어의 이전 위치는 빈 칸으로
-                copyMap[nx][ny] = -1; // 상어의 새로운 위치
+            if (nr < 0 || nc < 0 || nr >= 4 || nc >= 4 || copyMap[nr][nc] == 0) continue;
 
-                // 재귀 호출
-                dfs(copyMap, copyFishes, nx, ny, eatenFish.dir, eatSum + fishId);
+            int fishId = copyMap[nr][nc];
 
-                // 복원 (백트래킹)
-                copyFishes[fishId].isAlive = true;
-                copyMap[nx][ny] = fishId;
-                copyMap[sharkX][sharkY] = -1;
-            }
+            copyFishes[fishId].isAlive = false;
+            copyMap[sharkR][sharkC] = 0;
+            copyMap[nr][nc] = -1;
+
+            dfs(copyMap, copyFishes, nr, nc, copyFishes[fishId].dir, eatSum + fishId);
+
+            copyFishes[fishId].isAlive = true;
+            copyMap[sharkR][sharkC] = -1;
+            copyMap[nr][nc] = fishId;
+
         }
+
     }
 
-    // 모든 물고기 이동
-    static void moveAllFish(int[][] map, Fish[] fishes) {
+    private static void moveAllFish(int[][] map, Fish[] fishes) {
         for (int i = 1; i <= 16; i++) {
-            if (!fishes[i].isAlive) continue;
+            Fish now = fishes[i];
+            if (!now.isAlive) continue;
 
-            int x = fishes[i].x;
-            int y = fishes[i].y;
-            int dir = fishes[i].dir;
+            int r = now.r;
+            int c = now.c;
+            int dir = now.dir;
 
-            for (int j = 0; j < 8; j++) {
-                int nd = (dir + j) % 8;
-                int nx = x + dx[nd];
-                int ny = y + dy[nd];
+            for (int d = 0; d < 8; d++) {
+                int nd = (dir + d) % 8;
+                int nr = r + dr[nd];
+                int nc = c + dc[nd];
 
-                if (isIn(nx, ny) && map[nx][ny] != -1) { // 상어가 있는 칸은 피함
-                    // 빈 칸일 경우
-                    if (map[nx][ny] == 0) {
-                        map[x][y] = 0;
-                        map[nx][ny] = i;
-                        fishes[i].x = nx;
-                        fishes[i].y = ny;
-                        fishes[i].dir = nd;
-                    }
-                    // 다른 물고기가 있는 경우 교환
-                    else {
-                        int otherFishId = map[nx][ny];
-                        map[x][y] = otherFishId;
-                        map[nx][ny] = i;
-                        fishes[i].x = nx;
-                        fishes[i].y = ny;
-                        fishes[i].dir = nd;
-                        fishes[otherFishId].x = x;
-                        fishes[otherFishId].y = y;
-                    }
-                    break; // 이동 완료
+                if (nr < 0 || nc < 0 || nr >= 4 || nc >= 4 || map[nr][nc] == -1) continue;
+
+                if (map[nr][nc] == 0) {
+                    map[r][c] = 0;
+                    map[nr][nc] = i;
+                    now.r = nr;
+                    now.c = nc;
+                    now.dir = nd;
+                } else {
+                    int otherFishId = map[nr][nc];
+                    map[r][c] = otherFishId;
+                    map[nr][nc] = i;
+                    now.r = nr;
+                    now.c = nc;
+                    now.dir = nd;
+                    fishes[otherFishId].r = r;
+                    fishes[otherFishId].c = c;
                 }
+                break;
             }
         }
     }
 
-    // 격자 내에 있는지 확인
-    static boolean isIn(int x, int y) {
-        return x >= 0 && x < 4 && y >= 0 && y < 4;
+
+    private static void BackUp(int[][] map, int[][] copyMap, Fish[] fishes, Fish[] copyFishes) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                copyMap[i][j] = map[i][j];
+            }
+        }
+
+        for (int i = 0; i < 17; i++) {
+            Fish originalFish = fishes[i];
+            if (originalFish != null) {
+                copyFishes[i] = new Fish(originalFish.r, originalFish.c, originalFish.dir);
+                copyFishes[i].isAlive = originalFish.isAlive;
+            }
+        }
     }
 }
