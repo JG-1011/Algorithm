@@ -1,60 +1,62 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Stack;
-import java.util.StringTokenizer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
-/*
- * 커서의 위치를 알고 있어야 함
- * 문자의 위치도 알고 있어야 할까?
- * abcㅇdㅇ
- * 커서 d
- *
- * */
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
-        StringTokenizer st;
 
-        Stack<String> frontStack = new Stack<>();
-        Stack<String> backStack = new Stack<>();
+        // 초기 문자열 입력
+        String initialString = br.readLine();
+        int commandCount = Integer.parseInt(br.readLine());
 
-        String str = br.readLine();
-        for (int i = 0; i < str.length(); i++) {
-            String s = String.valueOf(str.charAt(i));
-            frontStack.push(s);
+        // 커서 왼쪽과 오른쪽을 관리할 Deque
+        Deque<Character> left = new ArrayDeque<>();
+        Deque<Character> right = new ArrayDeque<>();
+
+        // 초기 문자열을 모두 왼쪽 Deque에 추가
+        for (char c : initialString.toCharArray()) {
+            left.addLast(c);
         }
 
-        int order = Integer.parseInt(br.readLine());
-        for (int i = 0; i < order; i++) {
-            st = new StringTokenizer(br.readLine());
-            String a = st.nextToken();
-            if (a.equals("P")) {
-                String b = st.nextToken();
-                frontStack.push(b);
-            } else if (a.equals("L") && !frontStack.isEmpty()) {
-                String pop = frontStack.pop();
-                backStack.push(pop);
-            } else if (a.equals("D") && !backStack.isEmpty()) {
-                String pop = backStack.pop();
-                frontStack.push(pop);
-            } else if (a.equals("B") && !frontStack.isEmpty()) {
-                frontStack.pop();
+        // 명령어 처리
+        for (int i = 0; i < commandCount; i++) {
+            String command = br.readLine();
+
+            if (command.startsWith("L")) {
+                // 왼쪽으로 커서 이동
+                if (!left.isEmpty()) {
+                    right.addFirst(left.removeLast());
+                }
+            } else if (command.startsWith("D")) {
+                // 오른쪽으로 커서 이동
+                if (!right.isEmpty()) {
+                    left.addLast(right.removeFirst());
+                }
+            } else if (command.startsWith("B")) {
+                // 커서 왼쪽 문자 삭제
+                if (!left.isEmpty()) {
+                    left.removeLast();
+                }
+            } else if (command.startsWith("P")) {
+                // 커서 왼쪽에 문자 추가
+                char toAdd = command.charAt(2);
+                left.addLast(toAdd);
             }
         }
 
-        while (!frontStack.isEmpty()) {
-            String pop = frontStack.pop();
-            backStack.push(pop);
+        // 결과 생성
+        StringBuilder result = new StringBuilder();
+        for (char c : left) {
+            result.append(c);
+        }
+        for (char c : right) {
+            result.append(c);
         }
 
-        while (!backStack.isEmpty()) {
-            String pop = backStack.pop();
-            sb.append(pop);
-        }
-
-        System.out.println(sb);
-
+        // 결과 출력
+        System.out.println(result);
     }
 }
