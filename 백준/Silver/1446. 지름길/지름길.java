@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 /*
- * 1. dp로 풀어보자
+ *
  * */
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -26,7 +26,6 @@ public class Main {
             int e = Integer.parseInt(st.nextToken());
             int l = Integer.parseInt(st.nextToken());
 
-            // 유효한 지름길만 추가 (깨알 포인트)
             if (e <= D) {
                 roads.add(new Road(s, e, l));
             }
@@ -42,13 +41,14 @@ public class Main {
             }
 
             for (Road road : roads) {
-                if (road.start == i) {
-                    dist[road.end] = Math.min(dist[road.end], dist[i] + road.length);
+                if (i == road.start) {
+                    dist[road.end] = Math.min(dist[road.start] + road.length, dist[road.end]);
                 }
             }
         }
 
         System.out.println(dist[D]);
+
     }
 }
 
