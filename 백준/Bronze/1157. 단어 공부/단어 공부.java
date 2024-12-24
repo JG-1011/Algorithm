@@ -1,27 +1,32 @@
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String str = sc.next().toUpperCase();
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String str = br.readLine().toUpperCase();
 
-        int[] count = new int[26];
+        int[] alpa = new int[26];
 
         for (int i = 0; i < str.length(); i++) {
-            int num = str.charAt(i) -'A' ;
-            count[num]++;
+            int x = str.charAt(i) - 'A';
+            alpa[x]++;
         }
 
         int max = 0;
-        char answer = '?';
-        for (int i = 0; i < count.length; i++) {
-            if(max < count[i]){
-                max = count[i];
-                answer = (char)(i+'A');
-            } else if (max == count[i]){
-                answer = '?';
+        char result = ' ';
+        boolean isMulti = false;
+
+        for (int i = 0; i < alpa.length; i++) {
+            if (alpa[i] > max) {
+                max = alpa[i];
+                result = (char) ('A' + i);
+                isMulti = false;
+            } else if (alpa[i] == max) {
+                isMulti = true;
             }
         }
-        System.out.println(answer);
+        System.out.println(isMulti ? "?" : result);
     }
 }
