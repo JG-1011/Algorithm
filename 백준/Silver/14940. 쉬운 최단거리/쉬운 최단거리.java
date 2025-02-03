@@ -5,63 +5,92 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
-public class Main { // 쉬운 최단거리
-	static int arr[][], result[][], n, m;
-	static int dx[]= {-1,1,0,0};
-	static int dy[]= {0,0,-1,1};
-	static boolean visited[][];
-	public static void main(String[] args) throws IOException {
-		BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st=new StringTokenizer(bf.readLine());
+/*
+ * BFS
+ * 방문하지 않은 -1을 어떻게 처리해야할까?
+ *
+ *
+ * */
+public class Main {
+    static class Point {
+        int r, c;
 
-		// 지도의 크기
-		n=Integer.parseInt(st.nextToken());
-		m=Integer.parseInt(st.nextToken());
+        public Point(int r, int c) {
+            this.r = r;
+            this.c = c;
+        }
+    }
 
-		arr=new int[n][m]; // 지도
-		result=new int[n][m]; // 거리
-		visited=new boolean[n][m]; // 방문 여부
-		int x=0,y=0;
-		for(int i=0; i<n; i++) {
-			st=new StringTokenizer(bf.readLine());
-			for(int j=0; j<m; j++) {
-				arr[i][j]=Integer.parseInt(st.nextToken());
-				if(arr[i][j]==2) {  // 목표 지점
-					x=i;
-					y=j;
-				}else if(arr[i][j]==0) visited[i][j]=true; // 갈 수 없는 땅
-			}
-		}
-		search(x,y);
+    static int N, M;
+    static int[][] map, dp;
+    static int[] dr = {-1, 1, 0, 0};
+    static int[] dc = {0, 0, -1, 1};
 
-		for(int i=0; i<n; i++) {
-			for(int j=0; j<m; j++) {
-				if(!visited[i][j]) { // 도달할 수 없는 위치
-					result[i][j]=-1;
-				}	
-				System.out.print(result[i][j]+" ");	
-			}
-			System.out.println();
-		}
-	}
-	private static void search(int x, int y) {
-		Queue<int[]>queue=new LinkedList<>();
-		queue.add(new int[] {x,y});
-		visited[x][y]=true;
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        StringTokenizer st;
 
-		while(!queue.isEmpty()) {
-			int temp[]=queue.poll();
-			for(int i=0; i<4; i++) {
-				int a=temp[0]+dx[i];
-				int b=temp[1]+dy[i];
-				if(a>=0 && a< n && b>=0 && b<m) {
-					if(!visited[a][b] && arr[a][b]==1) {
-						visited[a][b]=true;
-						result[a][b]=result[temp[0]][temp[1]]+1;
-						queue.add(new int[] {a,b});
-					}
-				}
-			}
-		}
-	}
+
+        st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+
+        map = new int[N][M];
+        dp = new int[N][M];
+
+        int startR = -1;
+        int startC = -1;
+
+        for (int i = 0; i < N; i++) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < M; j++) {
+                map[i][j] = Integer.parseInt(st.nextToken());
+                if (map[i][j] == 2) {
+                    startR = i;
+                    startC = j;
+                }
+                if (map[i][j] == 1) {
+                    dp[i][j] = -1;
+                }
+            }
+        }
+
+        bfs(startR, startC);
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                sb.append(dp[i][j]).append(" ");
+            }
+            sb.append("\n");
+        }
+
+        System.out.println(sb);
+    }
+
+    private static void bfs(int startR, int startC) {
+        boolean[][] visited = new boolean[N][M];
+        Queue<Point> queue = new LinkedList<>();
+
+        visited[startR][startC] = true;
+        queue.add(new Point(startR, startC));
+        dp[startR][startC] = 0;
+
+        while (!queue.isEmpty()) {
+            Point now = queue.poll();
+
+            for (int d = 0; d < 4; d++) {
+                int nr = now.r + dr[d];
+                int nc = now.c + dc[d];
+
+                if (nr < 0 || nc < 0 || nr >= N || nc >= M || visited[nr][nc] || map[nr][nc] == 0) continue;
+
+                visited[nr][nc] = true;
+                queue.add(new Point(nr, nc));
+                dp[nr][nc] = dp[now.r][now.c] + 1;
+
+            }
+        }
+
+    }
 }
