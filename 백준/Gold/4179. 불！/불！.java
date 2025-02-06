@@ -1,110 +1,108 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Time;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.util.*;
 
+/*
+ * 불을 먼저 보내고 지훈이를 보낸다.
+ * 불과 벽은 통과하지 못한다.
+ * 불이 여러개 일 수 있다.
+ * */
 public class Main {
-	public static int n, m, ans;
-	public static int[] dx = {-1, 1, 0, 0};
-	public static int[] dy = {0, 0, -1, 1};
-	public static char[][] map;
-	public static class Node {
-		int x;
-		int y;
-		int time;
-		public Node(int x, int y, int time) {
-			this.x = x;
-			this.y = y;
-			this.time = time;
-		}
-	}
-	public static Queue<Node> jh, fire;
-	
-	public static void main(String[] args) throws IOException{
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-		n = Integer.parseInt(st.nextToken());
-		m = Integer.parseInt(st.nextToken());
-		jh = new LinkedList<>();
-		fire = new LinkedList<>();
-		
-		
-		map = new char[n][m];
-		for(int i=0;i<n;i++) {
-			map[i] = br.readLine().toCharArray();
-			for(int j=0;j<m;j++) {
-				if(map[i][j] == 'J') {
-					jh.add(new Node(i, j, 0));
-				}
-				
-				if(map[i][j] == 'F') {
-					fire.add(new Node(i, j, 0));
-				}
-			}
-		}
-		
-		ans = 0;
-		
-		if(bfs()) {
-			System.out.println("IMPOSSIBLE");
-		} else {
-			System.out.println(ans);
-		}
-	
-		
-		
-		
-	}
-	
-	public static boolean bfs() {
-		// 불 먼저
-		while(!jh.isEmpty()) {
-			int f_size = fire.size();
-			for(int i=0;i<f_size;i++) {
-				Node node = fire.poll();
-				
-				for(int d=0;d<4;d++) {
-					int nx = node.x + dx[d];
-					int ny = node.y + dy[d];
-					if(0 <= nx && nx < n && 0 <= ny && ny < m) {
-						if(map[nx][ny] != '#' && map[nx][ny] !='F') {
-							map[nx][ny] = 'F';
-							fire.add(new Node(nx, ny, node.time+1));
-						}
-					} 
-				}
-				
-			}
-			
-			int j_size = jh.size();
-			
-			for(int i=0;i<j_size;i++) {
-				Node node = jh.poll();
-				
-				for(int d=0;d<4;d++) {
-					int nx = node.x + dx[d];
-					int ny = node.y + dy[d];
-					if(nx < 0 || nx >= n || ny < 0 || ny >= m) {
-						ans = node.time+1;
-						return false;
-					}
-					
-					
-					if(map[nx][ny] != '#' && map[nx][ny] !='F' && map[nx][ny] != 'J') {
-							jh.add(new Node(nx, ny, node.time+1)); 
-							map[nx][ny] = 'J';
-					}
-					
-				}
-				
-			}
-			
-		}
-		return true;
+    static class Point {
+        int r, c;
 
-	}
+        public Point(int r, int c) {
+            this.r = r;
+            this.c = c;
+        }
+    }
 
+    static int[] dr = {-1, 1, 0, 0};
+    static int[] dc = {0, 0, -1, 1};
+
+    static char[][] map;
+    static int[][] fireTime, jihoonTime;
+    static int R, C;
+    static Queue<Point> jihoonQueue = new LinkedList<>();
+    static Queue<Point> fireQueue = new LinkedList<>();
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
+
+        st = new StringTokenizer(br.readLine());
+        R = Integer.parseInt(st.nextToken());
+        C = Integer.parseInt(st.nextToken());
+
+        map = new char[R][C];
+        fireTime = new int[R][C];
+        jihoonTime = new int[R][C];
+
+        for (int i = 0; i < R; i++) {
+            String str = br.readLine();
+            for (int j = 0; j < C; j++) {
+                map[i][j] = str.charAt(j);
+
+                fireTime[i][j] = -1;
+                jihoonTime[i][j] = -1;
+
+                if (map[i][j] == 'J') {
+                    jihoonQueue.add(new Point(i, j));
+                    jihoonTime[i][j] = 1;
+                }
+
+                if (map[i][j] == 'F') {
+                    fireQueue.add(new Point(i, j));
+                    fireTime[i][j] = 1;
+                }
+            }
+        }
+
+        fireMove();
+        int ans = jihoonMove();
+
+        System.out.println(ans == -1 ? "IMPOSSIBLE" : ans);
+    }
+    
+    private static void fireMove() {
+        while (!fireQueue.isEmpty()) {
+            Point now = fireQueue.poll();
+
+            for (int d = 0; d < 4; d++) {
+                int nr = now.r + dr[d];
+                int nc = now.c + dc[d];
+
+                if (nr < 0 || nc < 0 || nr >= R || nc >= C) continue;
+                if(map[nr][nc] == '#' || fireTime[nr][nc] != -1) continue;
+
+                fireQueue.add(new Point(nr, nc));
+                fireTime[nr][nc] = fireTime[now.r][now.c] + 1;
+            }
+        }
+    }
+    
+    private static int jihoonMove() {
+        while (!jihoonQueue.isEmpty()) {
+            Point now = jihoonQueue.poll();
+
+            for (int d = 0; d < 4; d++) {
+                int nr = now.r + dr[d];
+                int nc = now.c + dc[d];
+
+                if (nr < 0 || nc < 0 || nr >= R || nc >= C) {
+                    return jihoonTime[now.r][now.c];
+                }
+
+                if(map[nr][nc] == '#' || jihoonTime[nr][nc] != -1) continue;
+                // 불이 번진 곳 보다 && 먼저 이동해야 함
+                if (fireTime[nr][nc] != -1 && fireTime[nr][nc] <= jihoonTime[now.r][now.c] + 1) continue;
+
+                jihoonQueue.add(new Point(nr, nc));
+                jihoonTime[nr][nc] = jihoonTime[now.r][now.c] + 1;
+            }
+        }
+
+        return -1;
+    }
 }
