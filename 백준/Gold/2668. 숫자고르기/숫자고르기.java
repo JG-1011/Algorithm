@@ -24,26 +24,26 @@ import java.util.StringTokenizer;
 public class Main {
     static int N;
     static int[] arr;
-    static boolean[] visited, inCycle;
+    static boolean[] visited;
     static List<Integer> result;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st;
 
         N = Integer.parseInt(br.readLine());
-
         arr = new int[N + 1];
-        inCycle = new boolean[N + 1];
-        result = new ArrayList<>();
 
         for (int i = 1; i <= N; i++) {
             arr[i] = Integer.parseInt(br.readLine());
         }
 
+        result = new ArrayList<>();
+
         for (int i = 1; i <= N; i++) {
             visited = new boolean[N + 1];
-            dfs(i, i);
+            if (isCycle(i)) {
+                result.add(i);
+            }
         }
 
         Collections.sort(result);
@@ -53,16 +53,14 @@ public class Main {
         }
     }
 
-    private static void dfs(int start, int current) {
-        if (visited[current]) {
-            if (current == start) {
-                result.add(start);
-                inCycle[start] = true;
-            }
-            return;
-        }
+    private static boolean isCycle(int start) {
+        int current = start;
 
-        visited[current] = true;
-        dfs(start, arr[current]);
+        while (!visited[current]) {
+            visited[current] = true;
+            current = arr[current];
+        }
+        
+        return current == start;
     }
 }
