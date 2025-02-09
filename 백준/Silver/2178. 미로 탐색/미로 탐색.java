@@ -4,79 +4,74 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
-// 1 이동가능
-// 0 이동불가
-// 1,1에서 출발
-// N,M위치로 이동할 때 지나야 하는 최소의 칸수를 구해
-// 다익스트라?
 
-// cnt는 1부터 시작
+/*
+ * 문제
+ * 미로에서 1은 이동가능, 0은 이동 불가
+ * (1,1)에서 출발해서 (N,M)으로 도착할 때 최소로 움직이는 칸 수를 구하시오
+ *
+ * 풀이
+ * 거리배열을 만들어서 적어서 이동
+ */
 public class Main {
-	static int N, M, cnt;
-	static int[][] map;
-	static int[][] dist;
+    static class Point {
+        int r, c;
 
-	static int[] dr = { -1, 1, 0, 0 };
-	static int[] dc = { 0, 0, -1, 1 };
+        public Point(int r, int c) {
+            this.r = r;
+            this.c = c;
+        }
+    }
 
-	static class Point {
-		int r, c;
+    static int[] dr = {-1, 1, 0, 0};
+    static int[] dc = {0, 0, -1, 1};
+    static int N, M;
+    static int[][] map, dist;
 
-		public Point(int r, int c) {
-			this.r = r;
-			this.c = c;
-		}
-	}
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
+        st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-		st = new StringTokenizer(br.readLine());
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
+        map = new int[N][M];
+        dist = new int[N][M];
 
-		map = new int[N][M];
-		for (int i = 0; i < N; i++) {
-			String str = br.readLine();
-			for (int j = 0; j < M; j++) {
-				map[i][j] = str.charAt(j) - '0';
-			}
-		}
+        for (int i = 0; i < N; i++) {
+            String str = br.readLine();
+            for (int j = 0; j < M; j++) {
+                map[i][j] = str.charAt(j) - '0';
+            }
+        }
 
-		dist = new int[N][M];
-		dist[0][0] = 1;
-		bfs(0, 0);
-		System.out.println(dist[N - 1][M - 1]);
-	}
+        System.out.println(bfs(0, 0));
+    }
 
-	private static void bfs(int r, int c) {
-		Queue<Point> queue = new LinkedList<>();
-		boolean[][] visit = new boolean[N][M];
+    private static int bfs(int startR, int startC) {
+        boolean[][] visited = new boolean[N][M];
+        Queue<Point> queue = new LinkedList<>();
 
-		queue.add(new Point(r, c));
-		visit[r][c] = true;
+        visited[startR][startC] = true;
+        queue.add(new Point(startR, startC));
+        dist[startR][startC] = 1;
 
-		while (!queue.isEmpty()) {
-			Point now = queue.poll();
+        while (!queue.isEmpty()) {
+            Point now = queue.poll();
 
-			if (now.r == N && now.c == M) {
-				return;
-			}
+            for (int d = 0; d < 4; d++) {
+                int nr = now.r + dr[d];
+                int nc = now.c + dc[d];
 
-			for (int d = 0; d < 4; d++) {
-				int nr = now.r + dr[d];
-				int nc = now.c + dc[d];
+                if (nr < 0 || nc < 0 || nr >= N || nc >= M || visited[nr][nc] || map[nr][nc] == 0) continue;
 
-				if (nr < 0 || nc < 0 | nr >= N || nc >= M)
-					continue;
-				if (visit[nr][nc] || map[nr][nc] == 0)
-					continue;
+                visited[nr][nc] = true;
+                queue.add(new Point(nr, nc));
+                dist[nr][nc] = dist[now.r][now.c] + 1;
+            }
+        }
 
-				queue.add(new Point(nr, nc));
-				dist[nr][nc] = dist[now.r][now.c] + 1;
-				visit[nr][nc] = true;
-			}
-		}
-	}
+        return dist[N - 1][M - 1];
+    }
 }
