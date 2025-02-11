@@ -1,62 +1,54 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
-//나는 숫자를 뽑기만 하면 되는거 아닌가??
-
+/*
+ * 문제
+ * 숨바꼭질을 하고 있음
+ * 수빈이는 N에 있고 동생은 K에 있음
+ * 수빈이가 걷거나 순간이동을 통해 동생을 잡는다고 했을 때 얼마나 걸리는지 구해
+ */
 public class Main {
-	static int N, K, cnt;
-	static int[] visit;
-	static int[] map;
+    static int N, K;
+    static int[] dist;
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
 
-		N = Integer.parseInt(st.nextToken());
-		K = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        K = Integer.parseInt(st.nextToken());
 
-		visit = new int[100000+1];
-		cnt = 0;
+        dist = new int[100001];
 
-		if (N == K) {
-			System.out.println(0);
-		} else {
-			bfs(N);
-			System.out.println(visit[K]-1); // 시작점 값이 0이 아니라 1로 시작해서 -1를 해줘야 한다.
-		}
-	}
+        Arrays.fill(dist, -1);
 
-	public static void bfs(int start) {
-		Queue<Integer> queue = new LinkedList<>();
+        System.out.println(bfs(N, K));
+    }
 
-		queue.add(start);
-		visit[start] = 1;
+    private static int bfs(int start, int end) {
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(start);
+        dist[start] = 0;
 
-		while (!queue.isEmpty()) {
-			int num = queue.poll();
-			if (num == K) {
-				return;
-			}
+        while (!queue.isEmpty()) {
+            int now = queue.poll();
 
-			for (int i = 0; i < 3; i++) {
-				int next;
+            if (now == end) return dist[now];
 
-				if (i == 0) {
-					next = num + 1;
-				} else if (i == 1) {
-					next = num - 1;
-				} else {
-					next = num * 2;
-				}
-				if (next >= 0 && next < visit.length && visit[next] == 0) {
-					queue.add(next);
-					visit[next] = visit[num] + 1;
-				}
-			}
-		}
-	}
+            for (int next : new int[]{now - 1, now + 1, now * 2}) {
+                if (next >= 0 && next <= 100000 && dist[next] == -1) {
+                    dist[next] = dist[now] + 1;
+                    queue.add(next);
+                }
+            }
+        }
+
+        return -1;
+    }
 }
