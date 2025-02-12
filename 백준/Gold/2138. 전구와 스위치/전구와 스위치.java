@@ -11,7 +11,9 @@ import java.io.InputStreamReader;
  * 앞에서부터 순차적으로 변환하면서 진행하는 "그리디" 가 최적화된 방법
  * 이전 전구가 목표하는 상태와 다르면, 현재 위치의 스위치를 누른다
  *
- *
+ * 인사이트
+ * 앞에서부터 순차적으로 변환하면서 진행한다?? >> 그리드 사용해
+ * 분기점이 언제야? 첫번째 버튼을 누를때와 안 누를때 >> 구별해서 코드 작성
  * */
 public class Main {
     static int[] arr, target;
@@ -34,6 +36,7 @@ public class Main {
             target[i] = str.charAt(i) - '0';
         }
 
+        //분기점 첫번째 스위치를 누를때와 안누를때
         int noPressFirst = solve(false);
         int pressFirst = solve(true);
 
@@ -60,20 +63,21 @@ public class Main {
         return isSameTarget(temp) ? cnt : Integer.MAX_VALUE;
     }
 
+    private static void pressSwitch(int[] temp, int index) {
+        for (int i = index - 1; i <= index + 1; i++) {
+            //인덱스 변화를 주었기 때문에 범위 체크 해야함
+            if (i >= 0 && i < N) {
+                temp[i] ^= 1;
+            }
+        }
+    }
+
     private static boolean isSameTarget(int[] temp) {
-        //하나라도 다르면 펄스 다 맞으면 트루
+        //틀려 => false, 같아 => true
         for (int i = 0; i < N; i++) {
             if (temp[i] != target[i]) return false;
         }
 
         return true;
-    }
-
-    private static void pressSwitch(int[] temp, int index) {
-        for (int i = index - 1; i <= index + 1; i++) {
-            if (i >= 0 && i < N) {
-                temp[i] ^= 1;
-            }
-        }
     }
 }
