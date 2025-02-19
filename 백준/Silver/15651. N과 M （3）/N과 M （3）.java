@@ -3,40 +3,41 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
+/*
+ * 문제
+ * 순열, 중복허용
+ *
+ * */
 public class Main {
-	static int N, M;
-	static int[] arr;
-	static StringBuilder sb;
+    static int N, M;
+    static int[] arr;
+    static StringBuilder sb = new StringBuilder();
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
-		sb = new StringBuilder();
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
 
-		st = new StringTokenizer(br.readLine());
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-		arr = new int[M]; // 뽑은 수를 담아야 하기 때문에 M
+        arr = new int[M];
 
-		dfs(0);
-		System.out.println(sb);
-	}
+        combi(0);
 
-	public static void dfs(int depth) {
-		// 기저조건
-		if (depth == M) {
-			for (int a : arr) {
-				sb.append(a + " ");
-			}
-			sb.append("\n");
-			return;
-		}
+        System.out.println(sb);
+    }
 
-		// 재귀조건
-		for (int i = 1; i <= N; i++) {
-			arr[depth] = i;
-			dfs(depth + 1);
-		}
-	}
+    private static void combi(int depth) {
+        if (depth == M) {
+            for (int num : arr) sb.append(num).append(" ");
+            sb.append("\n");
+            return;
+        }
+
+        for (int i = 1; i <= N; i++) {
+            arr[depth] = i;
+            combi(depth + 1);
+        }
+    }
 }
