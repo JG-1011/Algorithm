@@ -1,46 +1,46 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringBuilder sb = new StringBuilder();
-		StringTokenizer st;
+    static int[] A;
 
-		int N = Integer.parseInt(br.readLine());
-		int arr[] = new int[N];
-		st = new StringTokenizer(br.readLine(), " ");
-		for (int i = 0; i < arr.length; i++) {
-			arr[i] = Integer.parseInt(st.nextToken());
-		}
-		Arrays.sort(arr); // 오름차순 정렬
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringBuilder sb = new StringBuilder();
+        StringTokenizer st;
 
-		int M = Integer.parseInt(br.readLine());
-		st = new StringTokenizer(br.readLine(), " ");
-		while (M-- > 0) {
-			int target = Integer.parseInt(st.nextToken());
-			sb.append(binarySearch(arr, target, 0, N - 1)).append("\n");
-		}
-		System.out.println(sb);
+        int N = Integer.parseInt(br.readLine());
+        A = new int[N];
+        st = new StringTokenizer(br.readLine());
 
-	}
+        for (int i = 0; i < N; i++) {
+            A[i] = Integer.parseInt(st.nextToken());
+        }
+        
+        Arrays.sort(A);
+        
+        int M = Integer.parseInt(br.readLine());
+        st = new StringTokenizer(br.readLine());
 
-	private static int binarySearch(int[] arr, int target, int start, int end) {
+        for (int i = 0; i < M; i++) {
+            int target = Integer.parseInt(st.nextToken());
+            sb.append(binarySearch(target) ? "1" : "0").append("\n");
+        }
+        
+        System.out.print(sb);
+    }
 
-		while (start <= end) {
-			int mid = (start + end) / 2;
-			if (arr[mid] == target) {
-				return 1;
-			} else if (arr[mid] > target) {
-				end = mid - 1;
-			} else {
-				start = mid + 1;
-			}
-		}
+    private static boolean binarySearch(int target) {
+        int left = 0, right = A.length - 1;
 
-		return 0;
-	}
+        while (left <= right) {
+            int mid = (left + right) / 2;
+
+            if (A[mid] == target) return true;
+            else if (A[mid] < target) left = mid + 1;
+            else right = mid - 1;
+        }
+
+        return false;
+    }
 }
