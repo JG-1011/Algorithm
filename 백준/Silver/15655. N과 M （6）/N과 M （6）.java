@@ -4,53 +4,50 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 
+/*
+ * 문제
+ * 조합, 중복x
+ *
+ * */
 public class Main {
-	static int N, M;
-	static int[] arr;
-	static int[] sortArr;
-	static StringBuilder sb;
-	static boolean[] visit;
+    static int N, M;
+    static int[] arr, arr2;
+    static StringBuilder sb = new StringBuilder();
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
-		sb = new StringBuilder();
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
 
-		st = new StringTokenizer(br.readLine());
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-		sortArr = new int[N];
+        arr = new int[N];
+        arr2 = new int[M];
 
-		st = new StringTokenizer(br.readLine());
-		for (int i = 0; i < N; i++) {
-			sortArr[i] = Integer.parseInt(st.nextToken());
-		}
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) {
+            arr[i] = Integer.parseInt(st.nextToken());
+        }
 
-		Arrays.sort(sortArr);
+        Arrays.sort(arr);
+        combi(0, 0);
 
-		arr = new int[M]; // 뽑은 수를 담아야 하기 때문에 M
-		visit = new boolean[N];
+        System.out.println(sb);
+    }
 
-		dfs(0, 0);
-		System.out.println(sb);
-	}
+    private static void combi(int start, int depth) {
+        if (depth == M) {
+            for (int num : arr2) sb.append(num).append(" ");
+            sb.append("\n");
+            return;
 
-	public static void dfs(int start, int depth) {
-		if (depth == M) {
-			for (int a : arr) {
-				sb.append(a + " ");
-			}
-			sb.append("\n");
-			return;
-		}
-		for (int i = start; i < N; i++) {
-			if (!visit[i]) {
-				visit[i] = true;
-				arr[depth] = sortArr[i];
-				dfs(i+1, depth + 1);
-				visit[i] = false;
-			}
-		}
-	}
+        }
+
+        for (int i = start; i < N; i++) {
+            arr2[depth] = arr[i];
+
+            combi(i + 1, depth + 1);
+        }
+    }
 }
