@@ -6,131 +6,113 @@ import java.util.Queue;
 import java.util.StringTokenizer;
 
 public class Main {
-	static class Point {
-		int r, c;
+    static int N, M, year;
+    static int[] dr = {-1, 1, 0, 0};
+    static int[] dc = {0, 0, -1, 1};
+    static int[][] map;
+    static boolean[][] visited;
 
-		public Point(int r, int c) {
-			this.r = r;
-			this.c = c;
-		}
-	}
+    static class Point {
+        int r, c;
 
-	static class Ice {
-		int r, c, zeroCnt;
+        public Point(int r, int c) {
+            this.r = r;
+            this.c = c;
+        }
+    }
 
-		public Ice(int r, int c, int zeroCnt) {
-			this.r = r;
-			this.c = c;
-			this.zeroCnt = zeroCnt;
-		}
-	}
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st;
 
-	static int N, M;
-	static int[][] map;
-	static boolean[][] visit;
-	static int[] dr = { -1, 1, 0, 0 }; // 상, 하, 좌, 우 방향 이동을 위한 배열
-	static int[] dc = { 0, 0, -1, 1 };
+        st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
+        map = new int[N][M];
+        for (int i = 0; i < N; i++) {
+            st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < M; j++) {
+                map[i][j] = Integer.parseInt(st.nextToken());
+            }
+        }
 
-		st = new StringTokenizer(br.readLine());
-		N = Integer.parseInt(st.nextToken()); // 지도의 행 수
-		M = Integer.parseInt(st.nextToken()); // 지도의 열 수
+        year = 0;
+        while (true) {
+            int icebergs = icebergCnt();
+            if (icebergs >= 2) break;
+            if (icebergs == 0){ // 문제에 조건이 써있음
+                year = 0;
+                break;
+            }
+            year++;
+            melt();
+        }
 
-		map = new int[N][M]; // 빙산의 높이 정보를 저장하는 2차원 배열
+        System.out.println(year);
+    }
 
-		// map 정보 채우기
-		for (int i = 0; i < N; i++) {
-			st = new StringTokenizer(br.readLine());
-			for (int j = 0; j < M; j++) {
-				map[i][j] = Integer.parseInt(st.nextToken());
-			}
-		}
+    private static int icebergCnt() {
+        visited = new boolean[N][M];
+        int cnt = 0;
 
-		int year = 0;
-		while (true) {
-			visit = new boolean[N][M];
-			int cnt = countIsland(); // 빙산이 몇 개의 섬으로 나뉘어 있는지 세는 함수 호출
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                if (map[i][j] != 0 && !visited[i][j]) {
+                    if (cnt > 0) return cnt + 1; // 두번쨰 빙산이 나오면 바로 리턴해서 최적화
+                    cnt++;
+                    bfs(i, j);
+                }
+            }
+        }
 
-			if (cnt >= 2) { // 빙산이 2개 이상으로 나뉘면 종료
-				break;
-			} else if (cnt == 0) { // 빙산이 모두 녹아 없어지면 종료
-				year = 0;
-				break;
-			}
+        return cnt;
+    }
 
-			visit = new boolean[N][M];
+    private static void bfs(int r, int c) {
+        Queue<Point> queue = new LinkedList<>();
 
-			// 빙산 녹이기
-			melt();
+        visited[r][c] = true;
+        queue.add(new Point(r, c));
 
-			year++; // 1년이 지남
-		}
+        while (!queue.isEmpty()) {
+            Point now = queue.poll();
 
-		System.out.println(year); // 결과 출력
-	}
+            for (int d = 0; d < 4; d++) {
+                int nr = now.r + dr[d];
+                int nc = now.c + dc[d];
 
-	public static void melt() {
-		Queue<Point> queue = new LinkedList<>();
+                if (nr < 0 || nc < 0 || nr >= N || nc >= M || visited[nr][nc] || map[nr][nc] == 0) continue;
 
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < M; j++) {
-				if (map[i][j] != 0) {
-					queue.offer(new Point(i, j)); // 빙산의 위치를 큐에 추가
-					visit[i][j] = true;
-				}
-			}
-		}
+                visited[nr][nc] = true;
+                queue.add(new Point(nr, nc));
+            }
+        }
+    }
 
-		while (!queue.isEmpty()) {
-			Point p = queue.poll();
+    private static void melt() {
+        int[][] temp = new int[N][M];
 
-			int cnt = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                if (map[i][j] != 0) {
+                    int zeroCnt = 0;
+                    for (int d = 0; d < 4; d++) {
+                        int nr = i + dr[d];
+                        int nc = j + dc[d];
 
-			for (int d = 0; d < 4; d++) {
-				int nr = p.r + dr[d];
-				int nc = p.c + dc[d];
+                        if (nr < 0 || nc < 0 || nr >= N || nc >= M || map[nr][nc] != 0) continue;
 
-				if (nr < 0 || nc < 0 || nr >= N || nc >= M || map[nr][nc] != 0 || visit[nr][nc]) {
-					continue;
-				}
-				cnt++;
-			}
-			if (map[p.r][p.c] - cnt > 0) {
-				map[p.r][p.c] -= cnt; // 주변 바다의 개수만큼 빙산을 녹임
-			} else {
-				map[p.r][p.c] = 0; // 녹인 결과가 음수가 되지 않도록 처리
-			}
-		}
-	}
+                        zeroCnt++;
+                    }
 
-	// 빙산이 몇 개의 섬으로 나뉘어 있는지 탐색하는 함수
-	public static int countIsland() {
-		int cnt = 0;
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < M; j++) {
-				if (!visit[i][j] && map[i][j] != 0) {
-					visit[i][j] = true;
-					dfs(i, j);
-					cnt++;
-				}
-			}
-		}
-		return cnt;
-	}
+                    temp[i][j] = Math.max(0, map[i][j] - zeroCnt);
+                }
+            }
+        }
 
-	// DFS를 사용하여 빙산이 연결된 부분을 찾는 함수
-	public static void dfs(int r, int c) {
-		for (int d = 0; d < 4; d++) {
-			int nr = r + dr[d];
-			int nc = c + dc[d];
-			if (nr < 0 || nc < 0 || nr >= N || nc >= M || map[nr][nc] == 0 || visit[nr][nc]) {
-				continue;
-			}
-			visit[nr][nc] = true;
-			dfs(nr, nc);
-		}
-	}
+        for (int i = 0; i < N; i++) {
+            System.arraycopy(temp[i], 0, map[i], 0, M);
+        }
+    }
 }
