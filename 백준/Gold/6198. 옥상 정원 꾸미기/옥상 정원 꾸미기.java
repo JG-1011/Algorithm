@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Stack;
 
 /*
  * 문제
@@ -11,7 +12,8 @@ import java.io.InputStreamReader;
  * 오른쪽을 바라보니까 뒤쪽부터 시작해보자
  * 10 3 7 4 12 2
  *
- * Stack : 2
+ * cnttt : 0 0 1 2
+ * Stack : 10 7 4
  *
  * 2
  * 비어있으면 0 넣고
@@ -46,32 +48,21 @@ public class Main {
 
         int N = Integer.parseInt(br.readLine());
 
-        int[] arr = new int[N];
+        Stack<Integer> stack = new Stack<>();
+        long cnt = 0;
+
         for (int i = 0; i < N; i++) {
-            arr[i] = Integer.parseInt(br.readLine());
-        }
+            int h = Integer.parseInt(br.readLine());
 
-        long ans = 0;
-
-        if (N == 1) {
-            ans = 0;
-        } else {
-            int left = 0;
-            int right = 0;
-            int cnt = 0;
-            for (int i = 0; i < arr.length - 1; i++) {
-                left = arr[i];
-                for (int j = i + 1; j < arr.length; j++) {
-                    right = arr[j];
-                    if (left <= right) break;
-
-                    cnt++;
-                }
-                ans += cnt;
-                cnt = 0;
+            while (!stack.isEmpty() && stack.peek() <= h) {
+                stack.pop();
             }
+
+            cnt += stack.size();
+
+            stack.push(h);
         }
 
-        System.out.println(ans);
+        System.out.println(cnt);
     }
 }
