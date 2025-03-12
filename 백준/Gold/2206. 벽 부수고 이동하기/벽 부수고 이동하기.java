@@ -1,93 +1,77 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-	static class Point {
-		int r, c, wallCount, moveCount;
+    static int N, M;
+    static int[][] map;
+    static boolean[][][] visited; // [x][y][벽 부숨 여부]
+    static int[] dx = {-1, 1, 0, 0};
+    static int[] dy = {0, 0, -1, 1};
 
-		public Point(int r, int c, int wallCount, int moveCount) {
-			this.r = r;
-			this.c = c;
-			this.wallCount = wallCount;
-			this.moveCount = moveCount;
-		}
-	}
+    static class Node {
+        int x, y, distance, breakChance;
 
-	static int[] dr = { -1, 1, 0, 0 };
-	static int[] dc = { 0, 0, -1, 1 };
+        public Node(int x, int y, int distance, int breakChance) {
+            this.x = x;
+            this.y = y;
+            this.distance = distance;
+            this.breakChance = breakChance;
+        }
+    }
 
-	static int N, M;
-	static int[][] map;
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-	public static void main(String[] args) throws IOException {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st;
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        map = new int[N][M];
+        visited = new boolean[N][M][2]; // [벽을 부수지 않음(0), 부숨(1)]
 
-		// 입력 처리
-		st = new StringTokenizer(br.readLine());
-		N = Integer.parseInt(st.nextToken()); // 세로 크기
-		M = Integer.parseInt(st.nextToken()); // 가로 크기
+        for (int i = 0; i < N; i++) {
+            String line = br.readLine();
+            for (int j = 0; j < M; j++) {
+                map[i][j] = line.charAt(j) - '0';
+            }
+        }
 
-		map = new int[N][M]; // 지도 정보를 저장하는 배열
+        System.out.println(bfs());
+    }
 
-		// 지도 정보 입력
-		for (int i = 0; i < N; i++) {
-			String str = br.readLine();
-			for (int j = 0; j < M; j++) {
-				map[i][j] = str.charAt(j) - '0'; // 문자열을 숫자로 변환하여 저장
-			}
-		}
+    static int bfs() {
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(new Node(0, 0, 1, 0)); // 시작점 (벽을 아직 부수지 않음)
+        visited[0][0][0] = true;
 
-		// BFS 탐색 결과 출력
-		System.out.println(bfs());
-	}
+        while (!queue.isEmpty()) {
+            Node now = queue.poll();
 
-	private static int bfs() {
-		boolean[][][] visit = new boolean[N][M][2]; // 방문 여부와 벽 부순 횟수를 저장하는 배열
-		Queue<Point> queue = new LinkedList<>(); // BFS를 위한 큐
+            // 도착점에 도달하면 거리 반환
+            if (now.x == N - 1 && now.y == M - 1) {
+                return now.distance;
+            }
 
-		// 시작 지점 추가
-		queue.add(new Point(0, 0, 0, 1)); // 시작점 (0,0), 벽 부순 횟수 0, 이동 횟수 1
-		visit[0][0][0] = true; // 시작 지점 방문 표시
+            for (int d = 0; d < 4; d++) {
+                int nx = now.x + dx[d];
+                int ny = now.y + dy[d];
 
-		while (!queue.isEmpty()) {
-			int size = queue.size();
-			while (size-- > 0) {
-				Point p = queue.poll(); // 큐에서 하나의 지점을 꺼냅니다.
+                // 범위를 벗어나면 패스
+                if (nx < 0 || ny < 0 || nx >= N || ny >= M) continue;
 
-				// 도착 지점에 도달했을 때 이동 횟수를 반환
-				if (p.r == N - 1 && p.c == M - 1) {
-					return p.moveCount;
-				}
+                // 1. 벽이 아닌 경우, 그냥 이동 가능
+                if (map[nx][ny] == 0 && !visited[nx][ny][now.breakChance]) {
+                    visited[nx][ny][now.breakChance] = true;
+                    queue.add(new Node(nx, ny, now.distance + 1, now.breakChance));
+                }
 
-				// 상하좌우로 이동
-				for (int d = 0; d < 4; d++) {
-					int nr = p.r + dr[d];
-					int nc = p.c + dc[d];
+                // 2. 벽인 경우, 부술 수 있는 기회가 있다면 부수고 이동
+                if (map[nx][ny] == 1 && now.breakChance == 0) {
+                    visited[nx][ny][1] = true;
+                    queue.add(new Node(nx, ny, now.distance + 1, 1)); // 벽을 부순 상태로 이동
+                }
+            }
+        }
 
-					// 범위를 벗어나면 무시
-					if (nr < 0 || nc < 0 || nr >= N || nc >= M) {
-						continue;
-					}
-
-					// 만약 벽이 아니고, 방문한 적이 없다면
-					if (map[nr][nc] == 0 && !visit[nr][nc][p.wallCount]) {
-						queue.add(new Point(nr, nc, p.wallCount, p.moveCount + 1)); // 이동 횟수를 증가하고 큐에 추가
-						visit[nr][nc][p.wallCount] = true; // 방문 표시
-					}
-
-					// 만약 벽이고, 벽을 부순 횟수가 1번 미만이고, 방문한 적이 없다면
-					if (map[nr][nc] == 1 && p.wallCount < 1 && !visit[nr][nc][p.wallCount + 1]) {
-						queue.add(new Point(nr, nc, p.wallCount + 1, p.moveCount + 1)); // 이동 횟수와 벽 부순 횟수를 증가하고 큐에 추가
-						visit[nr][nc][p.wallCount + 1] = true; // 방문 표시
-					}
-				}
-			}
-		}
-		return -1; // 목적지까지 도달하지 못한 경우 -1 반환
-	}
+        return -1; // 도착 불가능한 경우
+    }
 }
